@@ -34,8 +34,9 @@ func main() {
 	// counter
 	totalReqs := prometheus.NewCounter(
 		prometheus.CounterOpts{
-			Name: "total_http_request",
-			Help: "calculate total http request",
+			Name:        "total_http_request",
+			Help:        "calculate total http request",
+			ConstLabels: prometheus.Labels{"prop": "test"},
 		},
 	)
 	// countervec
