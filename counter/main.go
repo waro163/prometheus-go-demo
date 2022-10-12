@@ -31,6 +31,14 @@ func main() {
 	flag.Parse()
 	rand.Seed(time.Now().Unix())
 
+	// counter
+	totalReqs := prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "total_http_request",
+			Help: "calculate total http request",
+		},
+	)
+	// countervec
 	httpReqs := prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "http_requests_total",
@@ -38,6 +46,9 @@ func main() {
 		},
 		[]string{"code", "method"},
 	)
+
+	// register
+	prometheus.MustRegister(totalReqs)
 	prometheus.MustRegister(httpReqs)
 
 	httpReqs.WithLabelValues("404", "POST").Add(42)
@@ -52,8 +63,11 @@ func main() {
 			if v%3 == 0 {
 				httpReqs.With(prometheus.Labels{"code": "200", "method": "post"}).Add(float64(v))
 			} else {
-				httpReqs.With(prometheus.Labels{"code": "200", "method": "gGet"}).Inc()
+				httpReqs.With(prometheus.Labels{"code": "200", "method": "get"}).Inc()
 			}
+			// inc totalRequest
+			totalReqs.Add(float64(v))
+
 			time.Sleep(time.Microsecond * 300)
 		}
 	}()
