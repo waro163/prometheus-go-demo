@@ -53,23 +53,34 @@ func main() {
 	prometheus.MustRegister(httpReqs)
 
 	httpReqs.WithLabelValues("404", "POST").Add(42)
+	// go func() {
+	// 	for {
+	// 		v := rand.Intn(10)
+	// 		if v%2 == 0 {
+	// 			httpReqs.With(prometheus.Labels{"code": "200", "method": "POST"}).Add(float64(v))
+	// 		} else {
+	// 			httpReqs.With(prometheus.Labels{"code": "200", "method": "GET"}).Inc()
+	// 		}
+	// 		if v%3 == 0 {
+	// 			httpReqs.With(prometheus.Labels{"code": "200", "method": "post"}).Add(float64(v))
+	// 		} else {
+	// 			httpReqs.With(prometheus.Labels{"code": "200", "method": "get"}).Inc()
+	// 		}
+	// 		// inc totalRequest
+	// 		totalReqs.Add(float64(v))
+
+	// 		time.Sleep(time.Microsecond * 300)
+	// 	}
+	// }()
+
 	go func() {
 		for {
-			v := rand.Intn(10)
-			if v%2 == 0 {
-				httpReqs.With(prometheus.Labels{"code": "200", "method": "POST"}).Add(float64(v))
-			} else {
-				httpReqs.With(prometheus.Labels{"code": "200", "method": "GET"}).Inc()
-			}
-			if v%3 == 0 {
-				httpReqs.With(prometheus.Labels{"code": "200", "method": "post"}).Add(float64(v))
-			} else {
-				httpReqs.With(prometheus.Labels{"code": "200", "method": "get"}).Inc()
-			}
-			// inc totalRequest
-			totalReqs.Add(float64(v))
-
-			time.Sleep(time.Microsecond * 300)
+			httpReqs.WithLabelValues("200", "GET").Add(2)
+			httpReqs.WithLabelValues("200", "POST").Inc()
+			httpReqs.WithLabelValues("500", "GET").Add(3)
+			httpReqs.WithLabelValues("500", "POST").Inc()
+			totalReqs.Add(6)
+			time.Sleep(time.Second)
 		}
 	}()
 
