@@ -22,7 +22,7 @@ func main() {
 	// distribution. The buckets are targeted to the parameters of the
 	// normal distribution, with 20 buckets centered on the mean, each
 	// half-sigma wide.
-	hpptDurationsHistogram := prometheus.NewHistogram(prometheus.HistogramOpts{
+	httpDurationsHistogram := prometheus.NewHistogram(prometheus.HistogramOpts{
 		Name: "http_request_durations_seconds",
 		Help: "http request latency distributions.",
 		// Buckets: prometheus.LinearBuckets(0.001, 1, 20),
@@ -31,7 +31,7 @@ func main() {
 	})
 
 	//
-	hpptDurationsHistogramVec := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+	httpDurationsHistogramVec := prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Name:    "http_request_durations_seconds_by_path",
 		Help:    "http request latency distributions.",
 		Buckets: []float64{0.001, 0.005, 0.01, 0.03, 0.05, 0.08, 0.1, 0.5, 0.7, 0.8, 1},
@@ -40,21 +40,21 @@ func main() {
 	)
 
 	// register
-	prometheus.MustRegister(hpptDurationsHistogram)
-	prometheus.MustRegister(hpptDurationsHistogramVec)
+	prometheus.MustRegister(httpDurationsHistogram)
+	prometheus.MustRegister(httpDurationsHistogramVec)
 
 	go func() {
 		for {
 			v := rand.Intn(10)
-			hpptDurationsHistogram.Observe(float64(v))
+			httpDurationsHistogram.Observe(float64(v))
 			// inc totalRequest
 			v1 := rand.Float64()
 			if v < 3 {
-				hpptDurationsHistogramVec.WithLabelValues("svc1", "/ping").Observe(v1)
+				httpDurationsHistogramVec.WithLabelValues("svc1", "/ping").Observe(v1)
 			} else if v > 6 {
-				hpptDurationsHistogramVec.With(prometheus.Labels{"service": "svc3", "path": "/health"}).Observe(v1)
+				httpDurationsHistogramVec.With(prometheus.Labels{"service": "svc3", "path": "/health"}).Observe(v1)
 			} else {
-				hpptDurationsHistogramVec.WithLabelValues("svc2", "/probe").Observe(v1)
+				httpDurationsHistogramVec.WithLabelValues("svc2", "/probe").Observe(v1)
 			}
 			time.Sleep(time.Microsecond * 300)
 		}
